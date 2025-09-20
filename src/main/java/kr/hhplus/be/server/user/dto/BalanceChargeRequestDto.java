@@ -1,0 +1,4 @@
+package kr.hhplus.be.server.user.dto;
+
+public record BalanceChargeRequestDto(Integer amount) {
+}

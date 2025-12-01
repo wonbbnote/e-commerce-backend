@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.user.domain;
 
 import jakarta.persistence.*;
+import kr.hhplus.be.server.balance.domain.Balance;
 import lombok.*;
 
 import java.time.LocalDateTime;

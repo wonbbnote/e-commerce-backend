@@ -2,6 +2,7 @@ package kr.hhplus.be.server.user.domain;
 
 import jakarta.persistence.*;
 import kr.hhplus.be.server.balance.domain.Balance;
+import kr.hhplus.be.server.common.exception.BusinessException;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -33,10 +34,11 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     /**
-     * 새로운 사용자를 생성합니다 (Balance 포함)
+     * 새로운 사용자 생성 (Balance 포함)
      * @param email 이메일
-     * @param password 암호화된 비밀번호
+     * @param password 비밀번호 (일단 암호화 제외)
      * @return 생성된 User 객체
      */
     public static User createNewUser(String email, String password) {
@@ -61,23 +63,34 @@ public class User {
     }
 
     /**
+     * 사용자의 잔액 조회
+     * @return Balance 객체
+     */
+    public Balance getBalance(){
+        if (this.balance == null) throw new BusinessException.BalanceNotFoundException();
+        return this.balance;
+    }
+
+
+    /**
      * 이메일 검증
      */
     private static void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수입니다");
+            throw new BusinessException.MissingEmailException();
         }
         if (!email.contains("@")) {
-            throw new IllegalArgumentException("유효한 이메일이 아닙니다");
+            throw new BusinessException.InvalidEmailException();
         }
     }
 
     /**
-     * 비밀번호 검증
+     * 비밀 번호 검증
      */
     private static void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 필수입니다");
+            throw new BusinessException.InvalidPasswordException();
         }
     }
 }
+

@@ -21,9 +21,15 @@ public class BusinessException extends RuntimeException {
     }
 
     // User 관련 예외
+    public static class MissingEmailException extends BusinessException {
+        public MissingEmailException() {
+            super("MISSING_EMAIL", "이메일은 필수입니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     public static class InvalidEmailException extends BusinessException {
         public InvalidEmailException() {
-            super("INVALID_EMAIL", "이메일은 필수입니다", HttpStatus.BAD_REQUEST);
+            super("INVALID_EMAIL", "유효한 이메일이 아닙니다", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -46,14 +52,21 @@ public class BusinessException extends RuntimeException {
     }
 
     // Balance 관련 예외
+    public static class InvalidAmountException extends BusinessException {
+        public InvalidAmountException() {
+            super("INVALID_AMOUNT", "금액은 양수여야 합니다.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
     public static class BalanceNotFoundException extends BusinessException {
-        public BalanceNotFoundException(Long userId) {
-            super("BALANCE_NOT_FOUND", "잔액 정보를 찾을 수 없습니다: " + userId, HttpStatus.NOT_FOUND);
+        public BalanceNotFoundException() {
+            super("BALANCE_NOT_FOUND", "잔액 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND);
         }
     }
 
     public static class InsufficientBalanceException extends BusinessException {
-        public InsufficientBalanceException(Long userId) {
+        public InsufficientBalanceException() {
             super("INSUFFICIENT_BALANCE", "잔액이 부족합니다", HttpStatus.BAD_REQUEST);
         }
     }

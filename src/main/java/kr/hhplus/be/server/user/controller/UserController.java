@@ -32,7 +32,7 @@ public class UserController {
     }
 
     /**
-     * 사용자 조회 (ID 기반)
+     * 사용자 조회
      * @param userId 사용자 ID
      * @return 조회된 사용자 정보
      */

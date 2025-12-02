@@ -1,7 +1,12 @@
 package kr.hhplus.be.server.user.dto;
 
-import lombok.Builder;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 
-@Builder
-public record UserCreateRequest(String email, String password) {
+public record UserCreateRequest(
+        @NotNull
+        @Email
+        String email,
+        @NotNull
+        String password) {
 }

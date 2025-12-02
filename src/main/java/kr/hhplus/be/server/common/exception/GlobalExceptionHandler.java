@@ -4,10 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 전역 예외 처리 핸들러
@@ -18,15 +21,44 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     /**
-     * UserException 처리
-     * 각 UserException 내부 클래스가 정의한 HttpStatus를 사용
+     * 입력값 검증 예외 처리
+     * @Valid에서 발생하는 입력값 검증 예외 처리
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException e,
+            HttpServletRequest request) {
+
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        log.warn("Validation failed - path: {}, errors: {}", request.getRequestURI(), errors);
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("VALIDATION_FAILED")
+                .message("입력값 검증에 실패했습니다")
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .errors(errors)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
+    }
+
+    /**
+     * BusinessException 처리
+     * 각 BusinessException 내부 클래스가 정의한 HttpStatus를 사용
      */
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleUserException(
+    public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException e,
             HttpServletRequest request) {
 
-        log.warn("User exception occurred - code: {}, message: {}, path: {}",
+        log.warn("Business exception occurred - code: {}, message: {}, path: {}",
                 e.getCode(), e.getMessage(), request.getRequestURI());
 
         ErrorResponse errorResponse = ErrorResponse.builder()

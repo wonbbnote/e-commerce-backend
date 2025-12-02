@@ -1,12 +1,17 @@
 package kr.hhplus.be.server.order.domain.model;
 
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import kr.hhplus.be.server.product.domain.Product;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderItem {
 
     private Long id;
@@ -19,6 +24,26 @@ public class OrderItem {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // 주문항목 생성용 생성자
+    public OrderItem(Order order, Product product, Integer quantity) {
+        this.order = order;
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = product.getPrice();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Mapper용 생성자 (DB에서 조회한 데이터로 객체 재구성)
+    public OrderItem(Long id, Product product, Integer quantity, Integer unitPrice,
+                     LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     /**
      * Order 설정

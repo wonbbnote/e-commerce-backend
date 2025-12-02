@@ -73,6 +73,36 @@ public class BusinessException extends RuntimeException {
 
 
     // Coupon 관련 예외
+    public static class MissingCouponNameException extends BusinessException {
+        public MissingCouponNameException() {
+            super("MISSING_COUPON_NAME", "쿠폰 이름은 필수 입니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidateCouponNameLengthException extends BusinessException {
+        public InvalidateCouponNameLengthException() {
+            super("INVALID_COUPON_NAME_LENGTH", "쿠폰 이름은 255자 이내여야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidateDiscountAmountException extends BusinessException {
+        public InvalidateDiscountAmountException() {
+            super("INVALID_DISCOUNT_AMOUNT", "할인 가격은 1원 이상 이어야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidateQuantityException extends BusinessException {
+        public InvalidateQuantityException() {
+            super("INVALID_QUANTITY", "쿠폰 재고 수량은 1개 이상 이어야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class AlreadyExpiredException extends BusinessException {
+        public AlreadyExpiredException() {
+            super("ALREADY_EXPIRED", "이미 만료된 날짜입니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     public static class CouponNotFoundException extends BusinessException {
         public CouponNotFoundException(Long couponId) {
             super("COUPON_NOT_FOUND", "쿠폰을 찾을 수 없습니다: " + couponId, HttpStatus.NOT_FOUND);
@@ -80,14 +110,14 @@ public class BusinessException extends RuntimeException {
     }
 
     public static class CouponOutOfStockException extends BusinessException {
-        public CouponOutOfStockException(Long couponId) {
-            super("COUPON_OUT_OF_STOCK", "쿠폰 재고가 부족합니다: " + couponId, HttpStatus.BAD_REQUEST);
+        public CouponOutOfStockException() {
+            super("COUPON_OUT_OF_STOCK", "쿠폰 재고가 부족합니다", HttpStatus.BAD_REQUEST);
         }
     }
 
     public static class CouponExpiredException extends BusinessException {
-        public CouponExpiredException(Long couponId) {
-            super("COUPON_EXPIRED", "만료된 쿠폰입니다: " + couponId, HttpStatus.BAD_REQUEST);
+        public CouponExpiredException() {
+            super("COUPON_EXPIRED", "만료된 쿠폰입니다", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -108,8 +138,8 @@ public class BusinessException extends RuntimeException {
     }
 
     public static class CouponAlreadyUsedException extends BusinessException {
-        public CouponAlreadyUsedException(Long couponId) {
-            super("COUPON_ALREADY_USED", "이미 사용된 쿠폰입니다: " + couponId, HttpStatus.CONFLICT);
+        public CouponAlreadyUsedException() {
+            super("COUPON_ALREADY_USED", "이미 사용된 쿠폰입니다", HttpStatus.CONFLICT);
         }
     }
 
@@ -117,6 +147,36 @@ public class BusinessException extends RuntimeException {
     public static class ProductNotFoundException extends BusinessException {
         public ProductNotFoundException(Long productId) {
             super("PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다: " + productId, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public static class MissingProductNameException extends BusinessException {
+        public MissingProductNameException() {
+            super("MISSING_PRODUCT_NAME", "상품 이름은 필수 입니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidateProductNameLengthException extends BusinessException {
+        public InvalidateProductNameLengthException() {
+            super("INVALID_PRODUCT_NAME_LENGTH", "상품 이름은 255자 이내여야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidatePriceException extends BusinessException {
+        public InvalidatePriceException() {
+            super("INVALID_PRICE", "가격은 1원 이상 이어야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidateStockException extends BusinessException {
+        public InvalidateStockException() {
+            super("INVALID_STOCK", "재고 수량은 0개 이상 이어야 합니다", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public static class InvalidQuantityException extends BusinessException {
+        public InvalidQuantityException() {
+            super("INVALID_QUANTITY", "상품 수량은 1개 이상이어야 합니다", HttpStatus.BAD_REQUEST);
         }
     }
 

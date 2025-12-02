@@ -22,7 +22,6 @@ public class CouponService {
 
     private final CouponRepsitory couponRepsitory;
 
-
     /**
      * 새로운 쿠폰을 발행한다
      * @param couponName 쿠폰명
@@ -35,40 +34,13 @@ public class CouponService {
     @Transactional
     public CouponCreateResponse createCoupon(String couponName, Integer discountAmount,
                                              Integer totalQuantity, String strExpiredAt) {
-
-        try {
-            // 입력값 검증
-            validateCouponInput(couponName, discountAmount, totalQuantity, strExpiredAt);
-
-            LocalDateTime now = LocalDateTime.now();
-            // 문자열을 LocalDateTime으로 변환
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-            LocalDateTime expiredAt = parseExpiredDate(strExpiredAt, formatter);
-
-            // 만료 날짜가 현재 시간보다 이후인지 검증
-            if (expiredAt.isBefore(now) || expiredAt.equals(now)) {
-                throw new IllegalArgumentException("Expired date must be in the future");
-            }
-
-            Coupon newCoupon = Coupon.builder()
-                    .couponName(couponName)
-                    .discountAmount(discountAmount)
-                    .totalQuantity(totalQuantity)
-                    .remainingQuantity(totalQuantity)
-                    .expiredAt(expiredAt)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build();
-
-            Coupon savedCoupon = couponRepsitory.save(newCoupon);
-
-            return CouponCreateResponse.from(savedCoupon);
-
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create coupon", e);
-        }
+        // 만료 날짜 변환
+        LocalDateTime expiredAt = parseExpiredDate(strExpiredAt);
+        // 쿠폰 생성
+        Coupon newCoupon = new Coupon(couponName, discountAmount, totalQuantity, expiredAt);
+        // DB 저장
+        Coupon savedCoupon = couponRepsitory.save(newCoupon);
+        return CouponCreateResponse.from(savedCoupon);
     }
 
 
@@ -87,8 +59,9 @@ public class CouponService {
     /**
      * 만료 날짜 문자열 파싱
      */
-    private LocalDateTime parseExpiredDate(String strExpiredAt, DateTimeFormatter formatter) {
+    private LocalDateTime parseExpiredDate(String strExpiredAt) {
         try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm"); // 문자열 -> LocalDateTime으로 변환
             return LocalDateTime.parse(strExpiredAt, formatter);
         } catch (Exception e) {
             log.error("Invalid date format - expiredAt: {}", strExpiredAt, e);
@@ -96,34 +69,4 @@ public class CouponService {
                     "Invalid date format. Expected format: yyyyMMddHHmm (e.g., 202512312359)", e);
         }
     }
-
-
-    /**
-     * 입력값 검증
-     */
-    private void validateCouponInput(String couponName, Integer discountAmount,
-                                     Integer totalQuantity, String strExpiredAt){
-
-        if(couponName == null || couponName.isBlank()){
-            throw new IllegalArgumentException("Coupon name is required");
-        }
-
-        if (couponName.length() > 255) {
-            throw new IllegalArgumentException("Coupon name must be less than 255 characters");
-        }
-
-        if (discountAmount == null || discountAmount <= 0) {
-            throw new IllegalArgumentException("discountAmount must be greater than 0");
-        }
-
-        if (totalQuantity == null || totalQuantity <= 0) {
-            throw new IllegalArgumentException("totalQuantity must be greater than 0");
-        }
-
-        if (strExpiredAt == null || strExpiredAt.isBlank()) {
-            throw new IllegalArgumentException("strExpiredAt is required");
-        }
-    }
-
-
 }

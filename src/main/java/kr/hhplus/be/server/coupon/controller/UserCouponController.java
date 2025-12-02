@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Slf4j
 public class UserCouponController {
 
     private final UserCouponService userCouponService;
@@ -56,7 +55,6 @@ public class UserCouponController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         Page<UserCouponResponse> response = userCouponService.getUserCouponList(userId, pageable);
-
         return ResponseEntity.ok(response);
     }
 
@@ -83,14 +81,11 @@ public class UserCouponController {
      */
     private void validateSortField(String sortBy) {
         String[] validSortFields = {"id", "couponName", "discountAmount", "isUsed", "usedAt", "issuedAt"};
-
         for (String field : validSortFields) {
             if (field.equals(sortBy)) {
                 return;
             }
         }
-
-        log.warn("Invalid sort field requested: {}", sortBy);
         throw new IllegalArgumentException(
                 "Invalid sort field. Allowed fields: id, couponName, discountAmount, isUsed, usedAt, issuedAt");
     }

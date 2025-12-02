@@ -9,7 +9,6 @@ import kr.hhplus.be.server.coupon.repository.UserCouponRepository;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,53 +34,47 @@ public class UserCouponService {
     @Transactional
     public UserCouponResponse issueCoupon(Long userId, Long couponId) {
 
-        try {
-            // 사용자 존재 여부 확인
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new BusinessException.UserNotFoundException(userId));
+        // 사용자 존재 여부 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException.UserNotFoundException(userId));
 
-            // 쿠폰 존재 여부 확인
-            Coupon coupon = couponRepsitory.findById(couponId)
-                    .orElseThrow(() -> new BusinessException.CouponNotFoundException(couponId));
+        // 쿠폰 존재 여부 확인
+        Coupon coupon = couponRepsitory.findById(couponId)
+                .orElseThrow(() -> new BusinessException.CouponNotFoundException(couponId));
 
-            // 쿠폰이 이미 발급받았는지 확인 (DB 조회 전에 만료/재고 확인하는 것보다 효율적)
-            if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
-                throw new BusinessException.CouponAlreadyIssuedException(userId, couponId);
-            }
-
-            // 쿠폰 만료 여부 확인
-            if (coupon.isExpired()) {
-                throw new BusinessException.CouponExpiredException(couponId);
-            }
-
-            // 쿠폰 재고 여부 확인
-            if (!coupon.isAvailable()) {
-                throw new BusinessException.CouponOutOfStockException(couponId);
-            }
-
-            // 쿠폰 재고 감소
-            coupon.issue();
-            couponRepsitory.save(coupon);
-
-            // UserCoupon 생성 및 저장
-            LocalDateTime now = LocalDateTime.now();
-            UserCoupon userCoupon = UserCoupon.builder()
-                    .user(user)
-                    .coupon(coupon)
-                    .isUsed(false)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build();
-
-            UserCoupon savedUserCoupon = userCouponRepository.save(userCoupon);
-
-            return UserCouponResponse.from(savedUserCoupon);
-
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to issue coupon", e);
+        // 쿠폰이 이미 발급받았는지 확인
+        if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
+            throw new BusinessException.CouponAlreadyIssuedException(userId, couponId);
         }
+
+        // 쿠폰 만료 여부 확인
+        if (coupon.isExpired()) {
+            throw new BusinessException.CouponExpiredException();
+        }
+
+        // 쿠폰 만료 및 재고 여부 확인
+        if (!coupon.isAvailable()) {
+            throw new BusinessException.CouponOutOfStockException();
+        }
+
+        // 쿠폰 재고 감소
+        coupon.issue();
+        couponRepsitory.save(coupon);
+
+        // UserCoupon 생성
+        LocalDateTime now = LocalDateTime.now();
+        UserCoupon userCoupon = UserCoupon.builder()
+                .user(user)
+                .coupon(coupon)
+                .isUsed(false)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        // DB 저장
+        UserCoupon savedUserCoupon = userCouponRepository.save(userCoupon);
+
+        return UserCouponResponse.from(savedUserCoupon);
+
     }
 
     /**
@@ -102,32 +95,23 @@ public class UserCouponService {
      * @param userId 사용자 ID
      * @param couponId 쿠폰 ID
      * @return 사용된 쿠폰 정보
-     * @throws BusinessException 쿠폰이 없을 때
      */
     @Transactional
     public UserCouponResponse useCoupon(Long userId, Long couponId) {
 
-        try {
-            // 사용자의 쿠폰 조회
-            UserCoupon userCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId)
-                    .orElseThrow(() -> new BusinessException.UserCouponNotFoundException(userId, couponId));
+        // 사용자의 쿠폰 조회
+        UserCoupon userCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId)
+                .orElseThrow(() -> new BusinessException.UserCouponNotFoundException(userId, couponId));
 
-            // 이미 사용된 쿠폰인 경우
-            if (userCoupon.getIsUsed()) {
-                throw new BusinessException.CouponAlreadyUsedException(couponId);
-            }
-
-            // 쿠폰 사용 처리
-            userCoupon.use();
-            UserCoupon updatedUserCoupon = userCouponRepository.save(userCoupon);
-
-            return UserCouponResponse.from(updatedUserCoupon);
-
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to use coupon", e);
+        // 이미 사용된 쿠폰인 경우
+        if (userCoupon.getIsUsed()) {
+            throw new BusinessException.CouponAlreadyUsedException();
         }
+
+        // 쿠폰 사용 처리
+        userCoupon.use();
+        UserCoupon updatedUserCoupon = userCouponRepository.save(userCoupon);
+        return UserCouponResponse.from(updatedUserCoupon);
     }
 
     /**

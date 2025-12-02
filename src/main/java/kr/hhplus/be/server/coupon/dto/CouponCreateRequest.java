@@ -1,4 +1,13 @@
 package kr.hhplus.be.server.coupon.dto;
 
-public record CouponCreateRequest(String couponName, Integer discountAmount, Integer totalQuantity, String expiredAt) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+public record CouponCreateRequest(
+        @NotBlank String couponName,
+        @NotNull @Positive Integer discountAmount,
+        @NotNull @PositiveOrZero Integer totalQuantity,
+        @NotBlank String expiredAt) {
 }

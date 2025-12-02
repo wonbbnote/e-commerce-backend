@@ -25,33 +25,14 @@ public class ProductService {
      * @param price 가격 (1 이상)
      * @param stock 재고 (0 이상)
      * @return 생성된 상품 응답 DTO
-     * @throws IllegalArgumentException 입력값이 유효하지 않을 때
      */
     @Transactional
     public ProductCreateResponse createProduct(String productName, Integer price, Integer stock) {
-
-        try {
-            // 입력값 검증 (DTO 검증 외 추가 검증)
-            validateProductInput(productName, price, stock);
-
-            LocalDateTime now = LocalDateTime.now();
-            Product newProduct = Product.builder()
-                    .productName(productName)
-                    .price(price)
-                    .stock(stock)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build();
-
-            Product savedProduct = productRepository.save(newProduct);
-
-            return ProductCreateResponse.from(savedProduct);
-
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create product", e);
-        }
+        // 상품 생성
+        Product newProduct = new Product(productName, price, stock);
+        // DB 저장
+        Product savedProduct = productRepository.save(newProduct);
+        return ProductCreateResponse.from(savedProduct);
     }
 
 
@@ -62,23 +43,18 @@ public class ProductService {
      */
     public Page<ProductListGetResponse> getProductList(Pageable pageable) {
 
-        try {
-            Page<Product> products = productRepository.findAll(pageable);
+        Page<Product> products = productRepository.findAll(pageable);
 
-            // Entity → DTO 변환
-            Page<ProductListGetResponse> response = products.map(product ->
-                    ProductListGetResponse.builder()
-                            .productId(product.getId())
-                            .productName(product.getProductName())
-                            .price(product.getPrice())
-                            .stock(product.getStock())
-                            .build()
-            );
-            return response;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch product list", e);
-        }
+        // Entity → DTO 변환
+        Page<ProductListGetResponse> response = products.map(product ->
+                ProductListGetResponse.builder()
+                        .productId(product.getId())
+                        .productName(product.getProductName())
+                        .price(product.getPrice())
+                        .stock(product.getStock())
+                        .build()
+        );
+        return response;
     }
 
 
@@ -95,30 +71,12 @@ public class ProductService {
     }
 
 
+    /**
+     * 상품 수정
+     */
     public void updateProduct(Product product) {
         productRepository.save(product);
     }
 
 
-
-    /**
-     * 상품 입력값 검증
-     */
-    private void validateProductInput(String productName, Integer price, Integer stock) {
-        if (productName == null || productName.isBlank()) {
-            throw new IllegalArgumentException("Product name is required");
-        }
-
-        if (productName.length() > 255) {
-            throw new IllegalArgumentException("Product name must be less than 255 characters");
-        }
-
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Price must be greater than 0");
-        }
-
-        if (stock == null || stock < 0) {
-            throw new IllegalArgumentException("Stock must be greater than or equal to 0");
-        }
-    }
 }

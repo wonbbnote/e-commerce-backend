@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.product.controller;
 
+import jakarta.validation.Valid;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.dto.ProductCreateRequest;
 import kr.hhplus.be.server.product.dto.ProductCreateResponse;
@@ -27,14 +28,13 @@ public class ProductController {
      */
     @PostMapping
     public ResponseEntity<ProductCreateResponse> createProduct(
-            @RequestBody ProductCreateRequest request) {
+           @Valid @RequestBody ProductCreateRequest request) {
 
         ProductCreateResponse response = productService.createProduct(
                 request.productName(),
                 request.price(),
                 request.stock()
         );
-
         return ResponseEntity.status(201).body(response);  // 201 Created
     }
 

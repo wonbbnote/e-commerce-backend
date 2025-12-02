@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.product.controller;
 
+import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.dto.ProductCreateRequest;
 import kr.hhplus.be.server.product.dto.ProductCreateResponse;
 import kr.hhplus.be.server.product.dto.ProductListGetResponse;
@@ -66,7 +67,8 @@ public class ProductController {
      */
     @GetMapping("/{productId}")
     public ResponseEntity<ProductListGetResponse> getProductById(@PathVariable Long productId) {
-        ProductListGetResponse product = productService.getProductById(productId);
-        return ResponseEntity.ok(product);
+        Product product = productService.getProductById(productId);
+        ProductListGetResponse response = ProductListGetResponse.from(product);
+        return ResponseEntity.ok(response);
     }
 }

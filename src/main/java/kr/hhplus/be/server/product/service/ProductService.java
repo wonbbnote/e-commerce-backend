@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.product.service;
 
-
 import kr.hhplus.be.server.common.exception.BusinessException;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.dto.ProductCreateResponse;
@@ -89,13 +88,17 @@ public class ProductService {
      * @return 상품 정보
      */
     @Transactional(readOnly = true)
-    public ProductListGetResponse getProductById(Long productId) {
-
+    public Product getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException.ProductNotFoundException(productId));
-
-        return ProductListGetResponse.from(product);
+        return product;
     }
+
+
+    public void updateProduct(Product product) {
+        productRepository.save(product);
+    }
+
 
 
     /**

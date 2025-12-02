@@ -129,4 +129,18 @@ public class UserCouponService {
             throw new RuntimeException("Failed to use coupon", e);
         }
     }
+
+    /**
+     * 특정 사용자의 쿠폰 조회
+     * @param userCouponId 사용자 ID
+     * @return 쿠폰 정보
+     * @throws BusinessException 쿠폰이 없을 때
+     */
+    public UserCoupon getUserCoupon(Long userCouponId){
+        UserCoupon userCoupon = userCouponRepository.findById(userCouponId).orElseThrow(
+                () -> new BusinessException.UserCouponNotFoundException(userCouponId));
+        return userCoupon;
+    }
+
+
 }

@@ -26,4 +26,18 @@ public class Product {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
+    /**
+     * 상품 재고를 차감한다.
+     * @param count 구매한 상품의 개수
+     */
+    public void stockDown(Integer count) {
+        if (count == null || count <= 0) {
+            throw new IllegalArgumentException("0 이상");
+        }
+        this.stock -= count;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
 }

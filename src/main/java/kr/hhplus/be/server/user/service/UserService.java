@@ -12,7 +12,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserResponse createUser(String email, String password){
+    public User createUser(String email, String password){
 
         // 이메일 중복 확인
         if (userRepository.existsByEmail(email)) {
@@ -22,16 +22,15 @@ public class UserService {
         User newUser = User.createNewUser(email, password);
         // DB 저장 (User, Balance 함께 저장)
         User savedUser = userRepository.save(newUser);
-        // 반환값 변환
-        return UserResponse.from(savedUser);
+        return savedUser;
     }
 
 
-    public UserResponse getUserById(Long userId) {
+    public User getUserById(Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        return UserResponse.from(user);
+        return user;
     }
 }

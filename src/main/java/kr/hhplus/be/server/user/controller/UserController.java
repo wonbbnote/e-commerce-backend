@@ -24,9 +24,10 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request){
 
-        UserResponse response = userService.createUser(
+        User savedUser = userService.createUser(
                 request.email(), request.password()
         );
+        UserResponse response = UserResponse.from(savedUser);
         return ResponseEntity.status(201).body(response);
     }
 
@@ -37,7 +38,8 @@ public class UserController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> get(@PathVariable("userId") Long userId) {
-        UserResponse response = userService.getUserById(userId);
+        User user = userService.getUserById(userId);
+        UserResponse response = UserResponse.from(user);
         return ResponseEntity.ok(response);
     }
 

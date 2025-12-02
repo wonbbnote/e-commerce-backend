@@ -87,7 +87,7 @@ public class BusinessException extends RuntimeException {
 
     public static class InvalidateDiscountAmountException extends BusinessException {
         public InvalidateDiscountAmountException() {
-            super("INVALID_DISCOUNT_AMOUNT", "할인 가격은 1원 이상 이어야 합니다", HttpStatus.BAD_REQUEST);
+            super("INVALID_DISCOUNT_AMOUNT", "할인 금액은 1원 이상이어야 합니다", HttpStatus.BAD_REQUEST);
         }
     }
 

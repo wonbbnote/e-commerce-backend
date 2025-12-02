@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.order.domain.model;
 
-
 import kr.hhplus.be.server.common.exception.BusinessException;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
@@ -61,7 +60,6 @@ public class Order {
         this.orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
-
 
     /**
      * 결제 완료 시 상태 변경

@@ -23,8 +23,6 @@ public class BalanceService {
      * @param userId 사용자 ID
      * @param amount 충전할 금액 (양수여야 함)
      * @return 충전 후 응답 DTO
-     * @throws BusinessException.UserNotFoundException 사용자를 찾을 수 없을 때
-     * @throws BusinessException.BalanceNotFoundException 잔액을 찾을 수 없을 때
      */
     @Transactional
     public BalanceChargeResponse chargeBalance(Long userId, Integer amount) {
@@ -41,11 +39,9 @@ public class BalanceService {
 
 
     /**
-     * 사용자의 잔액 조회
+     * 사용자의 잔액을 조회한다
      * @param userId 사용자 ID
-     * @return 사용자의 Balance 객체
-     * @throws BusinessException.UserNotFoundException 사용자를 찾을 수 없을 때
-     * @throws BusinessException.BalanceNotFoundException 잔액을 찾을 수 없을 때
+     * @return 사용자의 BalanceGetResponse DTO
      */
     public BalanceGetResponse getBalance(Long userId) {
         // 사용자 조회

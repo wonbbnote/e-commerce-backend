@@ -52,17 +52,17 @@ public class BusinessException extends RuntimeException {
     }
 
     // Balance 관련 예외
-    public static class InvalidAmountException extends BusinessException {
-        public InvalidAmountException() {
-            super("INVALID_AMOUNT", "금액은 양수여야 합니다.", HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
     public static class BalanceNotFoundException extends BusinessException {
         public BalanceNotFoundException() {
             super("BALANCE_NOT_FOUND", "잔액 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public static class InvalidAmountException extends BusinessException {
+        public InvalidAmountException() {
+            super("INVALID_AMOUNT", "금액은 0보다 커야 합니다.", HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     public static class InsufficientBalanceException extends BusinessException {
@@ -70,6 +70,7 @@ public class BusinessException extends RuntimeException {
             super("INSUFFICIENT_BALANCE", "잔액이 부족합니다", HttpStatus.BAD_REQUEST);
         }
     }
+
 
     // Coupon 관련 예외
     public static class CouponNotFoundException extends BusinessException {
@@ -90,6 +91,16 @@ public class BusinessException extends RuntimeException {
         }
     }
 
+    public static class UserCouponNotFoundException extends BusinessException {
+        public UserCouponNotFoundException(Long userId, Long couponId) {
+            super("USER_COUPON_NOT_FOUND", "사용자의 쿠폰을 찾을 수 없습니다: " + userId + ", " + couponId, HttpStatus.NOT_FOUND);
+        }
+
+        public UserCouponNotFoundException(Long userCouponId) {
+            super("USER_COUPON_NOT_FOUND", "사용자의 쿠폰을 찾을 수 없습니다: " + userCouponId, HttpStatus.NOT_FOUND);
+        }
+    }
+
     public static class CouponAlreadyIssuedException extends BusinessException {
         public CouponAlreadyIssuedException(Long userId, Long couponId) {
             super("COUPON_ALREADY_ISSUED", "이미 발급받은 쿠폰입니다: " + userId + ", " + couponId, HttpStatus.CONFLICT);
@@ -99,16 +110,6 @@ public class BusinessException extends RuntimeException {
     public static class CouponAlreadyUsedException extends BusinessException {
         public CouponAlreadyUsedException(Long couponId) {
             super("COUPON_ALREADY_USED", "이미 사용된 쿠폰입니다: " + couponId, HttpStatus.CONFLICT);
-        }
-    }
-
-    public static class UserCouponNotFoundException extends BusinessException {
-        public UserCouponNotFoundException(Long userId, Long couponId) {
-            super("USER_COUPON_NOT_FOUND", "사용자의 쿠폰을 찾을 수 없습니다: " + userId + ", " + couponId, HttpStatus.NOT_FOUND);
-        }
-
-        public UserCouponNotFoundException(Long userCouponId) {
-            super("USER_COUPON_NOT_FOUND", "사용자의 쿠폰을 찾을 수 없습니다: " + userCouponId, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -132,16 +133,16 @@ public class BusinessException extends RuntimeException {
         }
     }
 
-    public static class InvalidOrderStatusException extends BusinessException {
-        public InvalidOrderStatusException(Long orderId) {
-            super("INVALID_ORDER_STATUS", "대기 중인 주문만 결제할 수 있습니다", HttpStatus.BAD_REQUEST);
-        }
-    }
-
     // Payment 관련 예외
     public static class UnauthorizedPaymentException extends BusinessException {
         public UnauthorizedPaymentException(Long userId) {
             super("UNAUTHORIZED_PAYMENT", "결제는 주문자만 할 수 있습니다", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    public static class InvalidOrderStatusException extends BusinessException {
+        public InvalidOrderStatusException(Long orderId) {
+            super("INVALID_ORDER_STATUS", "대기 중인 주문만 결제할 수 있습니다", HttpStatus.BAD_REQUEST);
         }
     }
 

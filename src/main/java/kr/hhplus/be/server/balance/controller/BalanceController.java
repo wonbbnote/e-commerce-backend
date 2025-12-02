@@ -40,8 +40,7 @@ public class BalanceController {
      */
     @GetMapping("/{userId}/balance")
     public ResponseEntity<BalanceGetResponse> getBalance(@PathVariable("userId") Long userId) {
-        Balance balance = balanceService.getBalance(userId);
-        BalanceGetResponse response = BalanceGetResponse.builder().userId(userId).balance(balance.getBalance()).build();
+        BalanceGetResponse response = balanceService.getBalance(userId);
         return ResponseEntity.ok(response);
     }
 

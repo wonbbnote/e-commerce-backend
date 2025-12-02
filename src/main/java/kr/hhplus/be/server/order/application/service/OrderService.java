@@ -70,7 +70,7 @@ public class OrderService {
             OrderItem orderItem = new OrderItem(order, products.get(i), items.get(i).quantity());
             order.addOrderItem(orderItem);
         }
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
         // 상품 재고 감소
         for (int i = 0; i < products.size(); i++){
@@ -85,7 +85,7 @@ public class OrderService {
         }
 
         // 반환
-        return OrderCreateResponse.from(order);
+        return OrderCreateResponse.from(savedOrder);
     }
 
 
@@ -129,11 +129,11 @@ public class OrderService {
         // Payment 생성
         LocalDateTime now = LocalDateTime.now();
         Payment payment = new Payment(order, PaymentStatus.SUCCESS, order.getTotalAmount(), now);
-        paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
 
         // 잔액 차감
         Integer payAmount = payment.getPaymentAmount();
-        Balance balance = balanceService.getBalance(userId);
+        Balance balance = user.getBalance();
         balance.decrease(payAmount);
 
         // Order 상태 업데이트
@@ -141,6 +141,6 @@ public class OrderService {
         orderRepository.save(order);
 
         // 반환
-        return OrderPayResponse.from(payment);
+        return OrderPayResponse.from(savedPayment);
     }
 }

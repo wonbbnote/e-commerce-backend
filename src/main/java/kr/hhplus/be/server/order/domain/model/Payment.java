@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.order.domain.model;
 
+import kr.hhplus.be.server.common.exception.BusinessException;
+import kr.hhplus.be.server.user.domain.User;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -41,69 +43,20 @@ public class Payment {
         this.updatedAt = updatedAt;
     }
 
+
     /**
-     * 결제를 완료한다
+     * 결제를 생성한다
      */
-    public void success() {
-        if (this.status != PaymentStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending payments can be completed");
+    public static Payment create(Order order, User user, LocalDateTime paidAt) {
+        // 주문 상태 확인
+        if(order.getStatus() != OrderStatus.PENDING){
+            throw new BusinessException.InvalidOrderStatusException();
         }
-        this.status = PaymentStatus.SUCCESS;
-        this.paidAt = LocalDateTime.now();
-    }
-
-    /**
-     * 결제를 실패한다
-     */
-    public void fail() {
-        if (this.status != PaymentStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending payments can be failed");
+        // 주문자 동일한지 확인
+        if(!order.getUser().equals(user)){
+            throw new BusinessException.UnauthorizedPaymentException();
         }
-        this.status = PaymentStatus.FAILED;
+        return new Payment(order, PaymentStatus.SUCCESS, order.getTotalAmount(), paidAt);
     }
 
-    /**
-     * 결제를 취소한다
-     */
-    public void cancel() {
-        if (this.status == PaymentStatus.CANCELLED) {
-            throw new IllegalArgumentException("Payment already cancelled");
-        }
-        this.status = PaymentStatus.CANCELLED;
-    }
-
-    /**
-     * 결제가 성공했는지 확인
-     */
-    public boolean isSucceeded() {
-        return this.status == PaymentStatus.SUCCESS;
-    }
-
-    /**
-     * 결제를 생성한다 (PENDING 상태)
-     */
-    public static Payment create(Order order, Integer paymentAmount) {
-        return new Payment(order, PaymentStatus.PENDING, paymentAmount, null);
-    }
-
-    // Mapper용 Setter
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setStatus(PaymentStatus status) {
-        this.status = status;
-    }
-
-    public void setPaidAt(LocalDateTime paidAt) {
-        this.paidAt = paidAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

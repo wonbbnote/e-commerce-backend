@@ -1,16 +1,11 @@
 package kr.hhplus.be.server.order.application.service;
 
 import kr.hhplus.be.server.balance.domain.Balance;
-import kr.hhplus.be.server.balance.dto.BalanceGetResponse;
 import kr.hhplus.be.server.balance.service.BalanceService;
 import kr.hhplus.be.server.common.exception.BusinessException;
-import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.UserCoupon;
 import kr.hhplus.be.server.coupon.service.UserCouponService;
-import kr.hhplus.be.server.order.domain.model.Order;
-import kr.hhplus.be.server.order.domain.model.OrderItem;
-import kr.hhplus.be.server.order.domain.model.Payment;
-import kr.hhplus.be.server.order.domain.model.PaymentStatus;
+import kr.hhplus.be.server.order.domain.model.*;
 import kr.hhplus.be.server.order.domain.repository.OrderRepository;
 import kr.hhplus.be.server.order.domain.repository.PaymentRepository;
 import kr.hhplus.be.server.order.presentation.request.OrderItemRequest;
@@ -35,7 +30,6 @@ public class OrderService {
     private final UserService userService;
     private final ProductService productService;
     private final UserCouponService userCouponService;
-    private final BalanceService balanceService;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
 
@@ -43,9 +37,8 @@ public class OrderService {
      * 주문을 생성한다
      * @param userId 결제할 사용자 ID
      * @param items 결제할 주문 상품 목록
-     * @param userCouponId 사용할 쿠폰 ID
+     * @param userCouponId 사용할 쿠폰 ID (Null 가능)
      * @return 생성된 주문 정보
-     * @throws BusinessException 검증 실패 시
      */
     @Transactional
     public OrderCreateResponse createOrder(Long userId, List<OrderItemRequest> items, Long userCouponId){
@@ -70,12 +63,13 @@ public class OrderService {
             OrderItem orderItem = new OrderItem(order, products.get(i), items.get(i).quantity());
             order.addOrderItem(orderItem);
         }
+        // DB 저장
         Order savedOrder = orderRepository.save(order);
 
         // 상품 재고 감소
         for (int i = 0; i < products.size(); i++){
             Product product = products.get(i);
-            product.stockDown(items.get(i).quantity());
+            product.decreaseStock(items.get(i).quantity());
             productService.updateProduct(product);
         }
 
@@ -116,19 +110,16 @@ public class OrderService {
     @Transactional
     public OrderPayResponse payOrder(Long userId, Long orderId) {
 
-        // 주문 검증 (존재 여부, 결제 여부, 사용자)
+        // 주문
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> new BusinessException.OrderNotFoundException(orderId));
 
         // 사용자 검증
         User user = userService.getUserById(userId);
-        if(!order.getUser().equals(user)){
-            new IllegalArgumentException("주문 결제할 수 없는 사용자입니다.");
-        }
 
-        // Payment 생성
+        // Payment 생성 및 DB 저장
         LocalDateTime now = LocalDateTime.now();
-        Payment payment = new Payment(order, PaymentStatus.SUCCESS, order.getTotalAmount(), now);
+        Payment payment = Payment.create(order, user, now);
         Payment savedPayment = paymentRepository.save(payment);
 
         // 잔액 차감

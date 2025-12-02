@@ -1,9 +1,8 @@
 package kr.hhplus.be.server.order.domain.model;
 
-import jakarta.persistence.*;
-import jdk.jshell.Snippet;
+
+import kr.hhplus.be.server.common.exception.BusinessException;
 import kr.hhplus.be.server.user.domain.User;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -63,47 +62,13 @@ public class Order {
         orderItem.setOrder(this);
     }
 
-    /**
-     * 주문 항목 제거
-     */
-    public void removeOrderItem(OrderItem orderItem) {
-        this.orderItems.remove(orderItem);
-        orderItem.setOrder(null);
-    }
-
-    /**
-     * 주문 확인
-     */
-    public void confirm() {
-        if (this.status != OrderStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending orders can be confirmed");
-        }
-        this.status = OrderStatus.PENDING;
-    }
-
-    /**
-     * 주문 취소 (배송 전까지만 가능)
-     */
-    public void cancel() {
-        if (this.status == OrderStatus.SHIPPED || this.status == OrderStatus.DELIVERED) {
-            throw new IllegalArgumentException("Cannot cancel shipped or delivered orders");
-        }
-        this.status = OrderStatus.CANCELLED;
-    }
-
-    /**
-     * 주문이 취소 가능한지 확인
-     */
-    public boolean isCancellable() {
-        return status != OrderStatus.SHIPPED && status != OrderStatus.DELIVERED && status != OrderStatus.CANCELLED;
-    }
 
     /**
      * 결제 완료 시 상태 변경
      */
     public void paidSuccess() {
         if (this.status != OrderStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending orders can be marked as paid");
+            throw new BusinessException.InvalidOrderStatusException();
         }
         this.status = OrderStatus.PAID;
     }

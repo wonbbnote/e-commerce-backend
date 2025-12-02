@@ -195,13 +195,13 @@ public class BusinessException extends RuntimeException {
 
     // Payment 관련 예외
     public static class UnauthorizedPaymentException extends BusinessException {
-        public UnauthorizedPaymentException(Long userId) {
+        public UnauthorizedPaymentException() {
             super("UNAUTHORIZED_PAYMENT", "결제는 주문자만 할 수 있습니다", HttpStatus.FORBIDDEN);
         }
     }
 
     public static class InvalidOrderStatusException extends BusinessException {
-        public InvalidOrderStatusException(Long orderId) {
+        public InvalidOrderStatusException() {
             super("INVALID_ORDER_STATUS", "대기 중인 주문만 결제할 수 있습니다", HttpStatus.BAD_REQUEST);
         }
     }

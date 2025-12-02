@@ -65,7 +65,7 @@ public class BalanceService {
      * @return 사용자의 Balance 객체
      * @throws BusinessException.UserNotFoundException 사용자를 찾을 수 없을 때
      */
-    public BalanceGetResponse getBalance(Long userId) {
+    public Balance getBalance(Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException.UserNotFoundException(userId));
@@ -77,6 +77,6 @@ public class BalanceService {
             throw new BusinessException.BalanceNotFoundException(userId);
         }
 
-        return BalanceGetResponse.builder().userId(userId).balance(balance.getBalance()).build();
+        return balance;
     }
 }

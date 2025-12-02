@@ -36,4 +36,20 @@ public class Balance {
         this.balance += amount;
         this.updatedAt = LocalDateTime.now();
     }
+
+    /**
+     * 잔액을 차감한다
+     * @param amount 충전할 금액 (양수여야 함)
+     */
+    public void decrease(Integer amount) {
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("Charge amount must be greater than 0");
+        }
+
+        if(amount > balance){
+            throw new IllegalArgumentException("잔액이 부족합니다");
+        }
+        this.balance -= amount;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

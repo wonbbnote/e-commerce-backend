@@ -30,7 +30,7 @@ public class Order {
     public Order(User user, Integer totalAmount, Integer discountAmount) {
         this.user = user;
         this.orderItems = new ArrayList<>();
-        this.status = OrderStatus.CONFIRMED;
+        this.status = OrderStatus.PENDING;
         this.totalAmount = totalAmount;
         this.discountAmount = discountAmount;
         this.finalAmount = totalAmount - discountAmount;
@@ -78,7 +78,7 @@ public class Order {
         if (this.status != OrderStatus.PENDING) {
             throw new IllegalArgumentException("Only pending orders can be confirmed");
         }
-        this.status = OrderStatus.CONFIRMED;
+        this.status = OrderStatus.PENDING;
     }
 
     /**
@@ -96,5 +96,15 @@ public class Order {
      */
     public boolean isCancellable() {
         return status != OrderStatus.SHIPPED && status != OrderStatus.DELIVERED && status != OrderStatus.CANCELLED;
+    }
+
+    /**
+     * 결제 완료 시 상태 변경
+     */
+    public void paidSuccess() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new IllegalArgumentException("Only pending orders can be marked as paid");
+        }
+        this.status = OrderStatus.PAID;
     }
 }

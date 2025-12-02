@@ -1,24 +1,30 @@
 package kr.hhplus.be.server.order.application.service;
 
+import kr.hhplus.be.server.balance.domain.Balance;
+import kr.hhplus.be.server.balance.dto.BalanceGetResponse;
+import kr.hhplus.be.server.balance.service.BalanceService;
 import kr.hhplus.be.server.common.exception.BusinessException;
 import kr.hhplus.be.server.coupon.domain.Coupon;
 import kr.hhplus.be.server.coupon.domain.UserCoupon;
 import kr.hhplus.be.server.coupon.service.UserCouponService;
 import kr.hhplus.be.server.order.domain.model.Order;
 import kr.hhplus.be.server.order.domain.model.OrderItem;
+import kr.hhplus.be.server.order.domain.model.Payment;
+import kr.hhplus.be.server.order.domain.model.PaymentStatus;
 import kr.hhplus.be.server.order.domain.repository.OrderRepository;
+import kr.hhplus.be.server.order.domain.repository.PaymentRepository;
 import kr.hhplus.be.server.order.presentation.request.OrderItemRequest;
 import kr.hhplus.be.server.order.presentation.response.OrderCreateResponse;
 import kr.hhplus.be.server.order.presentation.response.OrderPayResponse;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.service.ProductService;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.dto.UserResponse;
 import kr.hhplus.be.server.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +35,9 @@ public class OrderService {
     private final UserService userService;
     private final ProductService productService;
     private final UserCouponService userCouponService;
+    private final BalanceService balanceService;
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     /**
      * 주문을 생성한다
@@ -41,7 +49,6 @@ public class OrderService {
      */
     @Transactional
     public OrderCreateResponse createOrder(Long userId, List<OrderItemRequest> items, Long userCouponId){
-
         // 사용자 검증
         User user = userService.getUserById(userId);
 
@@ -89,11 +96,9 @@ public class OrderService {
             Integer quantity = item.quantity();
 
             Product product = productService.getProductById(productId);
-
             if(quantity > product.getStock()){
                 throw new BusinessException.ProductOutOfStockException(productId);
             }
-
             products.add(product);
             totalAmount += product.getPrice() * quantity;
         }
@@ -111,16 +116,31 @@ public class OrderService {
     @Transactional
     public OrderPayResponse payOrder(Long userId, Long orderId) {
 
-        // 주문 검증 (존재 여부, 결제 여부, 사용자 )
+        // 주문 검증 (존재 여부, 결제 여부, 사용자)
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new BusinessException.OrderNotFoundException(orderId));
+
+        // 사용자 검증
+        User user = userService.getUserById(userId);
+        if(!order.getUser().equals(user)){
+            new IllegalArgumentException("주문 결제할 수 없는 사용자입니다.");
+        }
 
         // Payment 생성
+        LocalDateTime now = LocalDateTime.now();
+        Payment payment = new Payment(order, PaymentStatus.SUCCESS, order.getTotalAmount(), now);
+        paymentRepository.save(payment);
 
         // 잔액 차감
+        Integer payAmount = payment.getPaymentAmount();
+        Balance balance = balanceService.getBalance(userId);
+        balance.decrease(payAmount);
 
         // Order 상태 업데이트
+        order.paidSuccess();
+        orderRepository.save(order);
 
         // 반환
-
-        return null;
+        return OrderPayResponse.from(payment);
     }
 }
